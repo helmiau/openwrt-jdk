@@ -6,13 +6,14 @@ set -o nounset
 #set -o pipefail
 set -x
 
-REVISION=11.0.11_p9-r0
-URL=http://dl-cdn.alpinelinux.org/alpine/v3.14/community
+VERSION="3.9"
+REVISION="$(curl -sL http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community/aarch64/ | grep 'openjdk11-src' | awk -F '-src-' '{print$2}' | sed 's|.apk.*||g')"
+URL="http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community"
 ARCH="aarch64 ppc64le s390x x86_64"
 PACKAGES="openjdk11 openjdk11-jdk openjdk11-jre openjdk11-jre-headless"
 
 old_pwd=$(pwd)
-tmp_dir=$(mktemp -d -t openjdk11-XXXXXXXXXX)
+tmp_dir=$(mktemp -d -t openjdk11-XXXXXXXXXX --tmpdir=/opt/tmp)
 trap "rm -rf $tmp_dir" EXIT
 
 cd "${tmp_dir}"
@@ -53,3 +54,6 @@ for arch in $ARCH;do
 	cp "$tmp_dir/openjdk-11_${arch}.tar.gz" "./"
 done
 
+mkdir /opt/usr/lib/jvm
+tar zxvf openjdk-11_${arch}.tar.gz -C /opt/usr/lib/jvm
+rm openjdk-11_${arch}.tar.gz
