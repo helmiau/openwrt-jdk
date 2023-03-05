@@ -6,8 +6,9 @@ set -o nounset
 #set -o pipefail
 set -x
 
-REVISION="8.282.08-r1"
-URL=http://dl-cdn.alpinelinux.org/alpine/v3.14/community
+VERSION="3.9"
+REVISION="$(curl -sL http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community/aarch64/ | grep 'openjdk8-src' | awk -F '-src-' '{print$2}' | sed 's|.apk.*||g')"
+URL="http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community"
 ARCH="aarch64 armhf armv7 ppc64le s390x x86 x86_64"
 PACKAGES="openjdk8 openjdk8-jre openjdk8-jre-lib openjdk8-jre-base"
 
