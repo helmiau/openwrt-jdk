@@ -46,7 +46,7 @@ else
 	echo -e "Packages: curl, libstdcpp6, libjpeg-turbo, libjpeg-turbo-utils, libnss already installed." 
 fi
 
-VERSION="3.9"
+VERSION="3.17"
 REVISION="$(curl -sL http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community/aarch64/ | grep 'openjdk11-src' | awk -F '-src-' '{print$2}' | sed 's|.apk.*||g')"
 URL="http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community"
 ARCH="aarch64 ppc64le s390x x86_64"
