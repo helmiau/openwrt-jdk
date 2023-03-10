@@ -1,0 +1,117 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Blog: https://helmiau.com
+# HelmiWrt by helmiau.com
+#=================================================
+
+name: Build OpenJDK for OpenWrt
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Select OpenJDK version option (check http://dl-cdn.alpinelinux.org/alpine for newer version)
+        required: true
+        default: 3.17
+      buildopt:
+        type: choice
+        description: Select OpenJDK build option
+        required: true
+        default: All
+        options: 
+        - All
+        - JDK8
+        - JDK11
+
+env:
+  TZ: Asia/Jakarta
+  THIS_REPO_NAME: ${{ github.event.repository.name }}
+  THIS_REPO_BRANCH: ${{ github.event.repository.default_branch }}
+  REPO_BRANCH: ${{ github.event.inputs.buildopt }}
+
+jobs:
+  Build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Initialization Environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+          echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
+          export JDK_VER="$(echo '${{ github.event.inputs.version }}')"
+          echo "JDK_VER=$JDK_VER" >> $GITHUB_ENV
+          export JDK_OPT="$(echo '${{ github.event.inputs.buildopt }}')"
+          echo "JDK_OPT=$JDK_OPT" >> $GITHUB_ENV
+
+      - name: Setting Permissions
+        id: sett_perm
+        if: steps.install_feeds.outputs.status == 'success' && !cancelled()
+        run: |
+          cd $GITHUB_WORKSPACE
+          chmod +x $GITHUB_WORKSPACE/gitbuild/*.sh
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Building Packages
+        id: build_pkgs
+        if: steps.sett_perm.outputs.status == 'success' && !cancelled()
+        run: |
+          cd $GITHUB_WORKSPACE
+          if [[ $JDK_OPT == "All" ]]; then
+            echo "Building JDK8..."
+            $GITHUB_WORKSPACE/gitbuild/build-jdk.sh $JDK_VER jdk8
+            echo "Building JDK11..."
+            $GITHUB_WORKSPACE/gitbuild/build-jdk.sh $JDK_VER jdk11
+          elif [[ $JDK_OPT == "JDK8" ]]; then
+            echo "Building JDK8..."
+            $GITHUB_WORKSPACE/gitbuild/build-jdk.sh $JDK_VER jdk8
+          elif [[ $JDK_OPT == "JDK11" ]]; then
+            echo "Building JDK11..."
+            $GITHUB_WORKSPACE/gitbuild/build-jdk.sh $JDK_VER jdk11
+          else
+            echo "JDK version is not set!... Exiting..."
+            exit 0
+          fi
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Listing Files
+        id: listing_files
+        if: steps.build_pkgs.outputs.status == 'success' && !cancelled()
+        run: |
+          cd $OPENWRT_ROOT_PATH
+          echo "JDKTARDIR=$jdk_tmp_dir" >> $GITHUB_ENV
+          export JDKTARDIR="$JDKTARDIR"
+          find $jdk_tmp_dir -type f -name 'rep4ck_*' | while read FILE ; do
+            echo -e "helmilog:: File located at $(readlink -f ${FILE})" ;
+          done
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Generate New Release Tag
+        id: tag
+        if: steps.listing_files.outputs.status == 'success' && !cancelled()
+        run: |
+          sleep 5
+          echo "release_tag=openjdk-build" >> $GITHUB_OUTPUT
+          echo "status=success" >> $GITHUB_OUTPUT
+
+      - name: Upload HelmiWrt Packages to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: steps.tag.outputs.status == 'success' && !cancelled()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prerelease: false
+          name: OpenJDK Build ${{ env.FILE_DATE }}
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          files: |
+            ${{ env.JDKTARDIR }}/*
+          body: |
+            **OpenJDK Build for OpenWrt**
+            [Donation here](https://www.helmiau.com/pay) • [Installation Tutorial](https://www.google.com/search?q=helmiau.com+helmiwrt+packages)
