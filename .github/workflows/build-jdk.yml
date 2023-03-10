@@ -87,11 +87,13 @@ jobs:
         if: steps.build_pkgs.outputs.status == 'success' && !cancelled()
         run: |
           cd $GITHUB_WORKSPACE
-          find $jdk_dir -type f -name 'openjdk*' | while read FILE ; do
-            echo -e "helmilog:: File located at $(readlink -f ${FILE})" ;
-          done
-          export UPLOADPATH="$GITHUB_WORKSPACE"
+          [ ! -d uploadPath ] && mkdir uploadPath
+          export UPLOADPATH="$GITHUB_WORKSPACE/uploadPath"
           echo "UPLOADPATH=$UPLOADPATH" >> $GITHUB_ENV
+          find $jdk_dir -type f -name 'openjdk*' | while read FILE ; do
+            echo -e "helmilog:: File located at $(readlink -f ${FILE})"
+            mv $(readlink -f ${FILE}) "${UPLOADPATH}/${FILE}"
+          done
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Generate New Release Tag
@@ -109,10 +111,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           prerelease: false
-          name: OpenJDK Build v${{ env.JDK_VER }} ${{ env.FILE_DATE }}
+          name: OpenJDK v${{ env.JDK_VER }} ${{ env.FILE_DATE }}
           tag_name: ${{ steps.tag.outputs.release_tag }}
           files: |
-            ${{ env.UPLOADPATH }}/openjdk*.tar.gz
+            ${{ env.UPLOADPATH }}/*.tar.gz
+            ${{ env.GITHUB_WORKSPACE }}/*.tar.gz
           body: |
             **OpenJDK Build for OpenWrt**
             [Donation here](https://www.helmiau.com/pay) • [Installation Tutorial](https://www.google.com/search?q=helmiau.com+helmiwrt+packages)
