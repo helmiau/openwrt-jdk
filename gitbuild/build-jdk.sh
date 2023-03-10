@@ -20,7 +20,7 @@ fi
 # JDK8 or JDK11
 if [[ "$2" =~ "jdk" ]];then
 	JDKV="open${2}"
-	JDKNUM="$( echo ${JDKV} } | sed 's|openjdk||g')"
+	JDKNUM="$( echo ${JDKV} | sed 's|openjdk||g')"
 else
 	echo "JDK version is not set!... Exiting..."
 	exit 1
@@ -33,8 +33,9 @@ if [[ ${JDKV} =~ "openjdk" ]]; then
 	ARCH="aarch64 armhf armv7 ppc64le s390x x86 x86_64"
 	PACKAGES="${JDKV} ${JDKV}-jdk ${JDKV}-jmods ${JDKV}-jre ${JDKV}-jre-lib ${JDKV}-jre-base ${JDKV}-jre-headless"
 fi
-old_pwd=$(pwd)
-jdk_dir=$(mkdir ${JDKV}-buildopenwrt)
+
+mkdir ${JDKV}-build
+jdk_dir="${JDKV}-buildopenwrt"
 export jdk_dir
 
 echo -e "
