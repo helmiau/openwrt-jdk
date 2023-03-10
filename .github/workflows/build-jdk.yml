@@ -90,7 +90,7 @@ jobs:
           find $jdk_dir -type f -name 'openjdk*' | while read FILE ; do
             echo -e "helmilog:: File located at $(readlink -f ${FILE})" ;
           done
-          export UPLOADPATH="/home/runner/work/openwrt-jdk/openwrt-jdk"
+          export UPLOADPATH="$GITHUB_WORKSPACE"
           echo "UPLOADPATH=$UPLOADPATH" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
 
@@ -109,10 +109,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           prerelease: false
-          name: OpenJDK Build ${{ env.FILE_DATE }}
+          name: OpenJDK Build v${{ env.JDK_VER }} ${{ env.FILE_DATE }}
           tag_name: ${{ steps.tag.outputs.release_tag }}
           files: |
-            $UPLOADPATH/openjdk*.tar.gz
+            ${{ env.UPLOADPATH }}/openjdk*.tar.gz
           body: |
             **OpenJDK Build for OpenWrt**
             [Donation here](https://www.helmiau.com/pay) • [Installation Tutorial](https://www.google.com/search?q=helmiau.com+helmiwrt+packages)
