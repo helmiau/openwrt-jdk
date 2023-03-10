@@ -94,6 +94,10 @@ jobs:
             echo -e "helmilog:: File located at $(readlink -f ${FILE})"
             mv $(readlink -f ${FILE}) "${UPLOADPATH}/${FILE}"
           done
+          echo "Rechecking files..."
+          find . -type f -name 'openjdk*' | while read FILE ; do
+            echo -e "helmilog:: File located at $(readlink -f ${FILE})"
+          done
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Generate New Release Tag
@@ -104,18 +108,18 @@ jobs:
           echo "release_tag=openjdk-build-v$JDK_VER" >> $GITHUB_OUTPUT
           echo "status=success" >> $GITHUB_OUTPUT
 
-      - name: Upload HelmiWrt Packages to GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload Files to Github Release
+        uses: ncipollo/release-action@v1.12.0
         if: steps.tag.outputs.status == 'success' && !cancelled()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           prerelease: false
+          allowUpdates: true
+          replacesArtifacts: true
           name: OpenJDK v${{ env.JDK_VER }} ${{ env.FILE_DATE }}
-          tag_name: ${{ steps.tag.outputs.release_tag }}
-          files: |
-            ${{ env.UPLOADPATH }}/*.tar.gz
-            ${{ env.GITHUB_WORKSPACE }}/*.tar.gz
+          tag: ${{ steps.tag.outputs.release_tag }}
+          commit: ${{ env.CURRENT_BRANCH }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ${{ env.UPLOADPATH }}/*
           body: |
             **OpenJDK Build for OpenWrt**
             [Donation here](https://www.helmiau.com/pay) • [Installation Tutorial](https://www.google.com/search?q=helmiau.com+helmiwrt+packages)
