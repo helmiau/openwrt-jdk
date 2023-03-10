@@ -90,7 +90,7 @@ jobs:
           find $jdk_dir -type f -name 'openjdk*' | while read FILE ; do
             echo -e "helmilog:: File located at $(readlink -f ${FILE})" ;
           done
-          export UPLOADPATH=/home/runner/work/openwrt-jdk/openwrt-jdk"
+          export UPLOADPATH="/home/runner/work/openwrt-jdk/openwrt-jdk"
           echo "UPLOADPATH=$UPLOADPATH" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
 
