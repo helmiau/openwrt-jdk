@@ -19,9 +19,7 @@ fi
 
 # JDK8 or JDK11
 if [[ "$2" == "jdk8" ]];then
-	JDKV="openjdk8"
-elif [[ "$2" == "jdk11" ]];then
-	JDKV="openjdk11"
+	JDKV="open${2}"
 else
 	echo "JDK version is not set!... Exiting..."
 	exit 1
