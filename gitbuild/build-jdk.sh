@@ -18,8 +18,9 @@ else
 fi
 
 # JDK8 or JDK11
-if [[ "$2" == *"jdk"* ]];then
+if [[ "$2" =~ "jdk" ]];then
 	JDKV="open${2}"
+	JDKNUM="$( cat ${JDKV} } | sed 's|openjdk||g')"
 else
 	echo "JDK version is not set!... Exiting..."
 	exit 1
@@ -29,16 +30,13 @@ URL="http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community"
 curl -sL ${URL}/aarch64/ | grep ${JDKV}-doc | awk -F ${JDKV}-doc- '{print$2}' | sed 's|.apk.*||g' > JDKREV
 REVISION="$(cat JDKREV && rm JDKREV)"
 export REVISION
-if [[ ${JDKV} == "openjdk11" ]]; then
-	ARCH="aarch64 ppc64le s390x x86_64"
-	PACKAGES="${JDKV} ${JDKV}-jdk ${JDKV}-jre ${JDKV}-jre-headless"
-else
+if [[ ${JDKV} =~ "openjdk" ]]; then
 	ARCH="aarch64 armhf armv7 ppc64le s390x x86 x86_64"
-	PACKAGES="${JDKV} ${JDKV}-jre ${JDKV}-jre-lib ${JDKV}-jre-base"
+	PACKAGES="${JDKV} ${JDKV}-jdk ${JDKV}-jmods ${JDKV}-jre ${JDKV}-jre-lib ${JDKV}-jre-base ${JDKV}-jre-headless"
 fi
 old_pwd=$(pwd)
-jdk_tmp_dir=$(mktemp -d -t ${JDKV}-XXXXXXXXXX)
-export jdk_tmp_dir
+jdk_dir=$(mkdir ${JDKV}-buildopenwrt)
+export jdk_dir
 
 echo -e "
 ============
@@ -46,17 +44,18 @@ INGFOOOOOO
 ============
 VERSION::$VERSION
 JDKV::$JDKV
+JDKNUM::$JDKNUM
 URL::$URL
 REVISION::$REVISION
 ARCH::$ARCH
 PACKAGES::$PACKAGES
-TMPDIR::$jdk_tmp_dir
+TMPDIR::$jdk_dir
 ============
 "
 
-# trap "rm -rf $jdk_tmp_dir" EXIT
+# trap "rm -rf $jdk_dir" EXIT
 
-cd "${jdk_tmp_dir}"
+cd "${jdk_dir}"
 
 #execute cmds
 for arch in $ARCH;do
@@ -68,19 +67,24 @@ for arch in $ARCH;do
 		#download packages
 		PKGREVARCH="${pkg}-${REVISION}_${arch}.apk"
 		echo -e "helmilog:: downloading ${PKGREVARCH}..."
-		curl -o "${PKGREVARCH}" "${URL}/${arch}/${pkg}-${REVISION}.apk"
-		echo -e "helmilog:: ${PKGREVARCH} downloaded! extracting..."
+		if curl --output /dev/null --silent --head --fail "${URL}/${arch}/${pkg}-${REVISION}.apk"; then
+			echo "URL exists: $url"
+			curl -o "${PKGREVARCH}" "${URL}/${arch}/${pkg}-${REVISION}.apk"
+			echo -e "helmilog:: ${PKGREVARCH} downloaded! extracting..."
+		else
+			echo "URL does not exist! skipping..."
+		fi
 		#extract apks to corresponding arch dir
 		if [[ -f "${PKGREVARCH}" ]]; then
 			tar xzf "${PKGREVARCH}" -C "${JDKVARCH}"
 			rm -f "${PKGREVARCH}"
 			echo -e "helmilog:: ${PKGREVARCH} extracted and removed..."
 			#repacking all libs to tar them up
-			JDKTMPDIR="${JDKVARCH}/usr/lib/jvm"
-			if [[ -d "${JDKTMPDIR}/java-1.8-openjdk" ]]; then
-				JDKSRCDIR="${JDKTMPDIR}/java-1.8-openjdk"
-			elif [[ -d "${JDKTMPDIR}/java-11-openjdk" ]]; then
-				JDKSRCDIR="${JDKTMPDIR}/java-11-openjdk"
+			JDKDIR="${JDKVARCH}/usr/lib/jvm"
+			if [[ -d "${JDKDIR}/java-1.8-openjdk" ]]; then
+				JDKSRCDIR="${JDKDIR}/java-1.8-openjdk"
+			elif [[ -d "${JDKDIR}/java-11-openjdk" ]]; then
+				JDKSRCDIR="${JDKDIR}/java-11-openjdk"
 			else
 				echo "EROOORORORORORORORO REPAXKXKIANC"
 			fi

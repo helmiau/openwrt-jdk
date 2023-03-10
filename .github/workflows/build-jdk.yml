@@ -85,9 +85,9 @@ jobs:
         if: steps.build_pkgs.outputs.status == 'success' && !cancelled()
         run: |
           cd $OPENWRT_ROOT_PATH
-          echo "JDKTARDIR=$jdk_tmp_dir" >> $GITHUB_ENV
+          echo "JDKTARDIR=$jdk_dir" >> $GITHUB_ENV
           export JDKTARDIR="$JDKTARDIR"
-          find $jdk_tmp_dir -type f -name 'rep4ck_*' | while read FILE ; do
+          find $jdk_dir -type f -name 'rep4ck_*' | while read FILE ; do
             echo -e "helmilog:: File located at $(readlink -f ${FILE})" ;
           done
           echo "status=success" >> $GITHUB_OUTPUT
