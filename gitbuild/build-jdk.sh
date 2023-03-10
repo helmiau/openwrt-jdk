@@ -20,16 +20,15 @@ fi
 # JDK8 or JDK11
 if [[ "$2" =~ "jdk" ]];then
 	JDKV="open${2}"
-	JDKNUM="$( cat ${JDKV} } | sed 's|openjdk||g')"
+	JDKNUM="$( echo ${JDKV} } | sed 's|openjdk||g')"
 else
 	echo "JDK version is not set!... Exiting..."
 	exit 1
 fi
 
 URL="http://dl-cdn.alpinelinux.org/alpine/v${VERSION}/community"
-curl -sL ${URL}/aarch64/ | grep ${JDKV}-doc | awk -F ${JDKV}-doc- '{print$2}' | sed 's|.apk.*||g' > JDKREV
-REVISION="$(cat JDKREV && rm JDKREV)"
-export REVISION
+REVS="$(echo $(curl -sL ${URL}/aarch64/ | grep ${JDKV}-doc | awk -F ${JDKV}-doc- '{print$2}' | sed 's|.apk.*||g'))"
+export REVS
 if [[ ${JDKV} =~ "openjdk" ]]; then
 	ARCH="aarch64 armhf armv7 ppc64le s390x x86 x86_64"
 	PACKAGES="${JDKV} ${JDKV}-jdk ${JDKV}-jmods ${JDKV}-jre ${JDKV}-jre-lib ${JDKV}-jre-base ${JDKV}-jre-headless"
@@ -46,7 +45,7 @@ VERSION::$VERSION
 JDKV::$JDKV
 JDKNUM::$JDKNUM
 URL::$URL
-REVISION::$REVISION
+REVS::$REVS
 ARCH::$ARCH
 PACKAGES::$PACKAGES
 TMPDIR::$jdk_dir
@@ -65,11 +64,11 @@ for arch in $ARCH;do
 	#download, extract, repack packages
 	for pkg in $PACKAGES; do
 		#download packages
-		PKGREVARCH="${pkg}-${REVISION}_${arch}.apk"
+		PKGREVARCH="${pkg}-${REVS}_${arch}.apk"
 		echo -e "helmilog:: downloading ${PKGREVARCH}..."
-		if curl --output /dev/null --silent --head --fail "${URL}/${arch}/${pkg}-${REVISION}.apk"; then
+		if curl --output /dev/null --silent --head --fail "${URL}/${arch}/${pkg}-${REVS}.apk"; then
 			echo "URL exists: $url"
-			curl -o "${PKGREVARCH}" "${URL}/${arch}/${pkg}-${REVISION}.apk"
+			curl -o "${PKGREVARCH}" "${URL}/${arch}/${pkg}-${REVS}.apk"
 			echo -e "helmilog:: ${PKGREVARCH} downloaded! extracting..."
 		else
 			echo "URL does not exist! skipping..."
@@ -83,12 +82,12 @@ for arch in $ARCH;do
 			JDKDIR="${JDKVARCH}/usr/lib/jvm"
 			if [[ -d "${JDKDIR}/java-1.8-openjdk" ]]; then
 				JDKSRCDIR="${JDKDIR}/java-1.8-openjdk"
-			elif [[ -d "${JDKDIR}/java-11-openjdk" ]]; then
-				JDKSRCDIR="${JDKDIR}/java-11-openjdk"
+			elif [[ -d "${JDKDIR}/java-${JDKNUM}-openjdk" ]]; then
+				JDKSRCDIR="${JDKDIR}/java-${JDKNUM}-openjdk"
 			else
 				echo "EROOORORORORORORORO REPAXKXKIANC"
 			fi
-			[[ -n ${JDKSRCDIR} ]] && tar czf "rep4ck_${JDKVARCH}.tar.gz" -C "${JDKSRCDIR}/" .
+			[[ -n ${JDKSRCDIR} ]] && tar czf "${JDKVARCH}-v${VERSION}.tar.gz" -C "${JDKSRCDIR}/" .
 		fi
 	done
 done
