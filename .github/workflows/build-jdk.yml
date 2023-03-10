@@ -87,11 +87,11 @@ jobs:
         if: steps.build_pkgs.outputs.status == 'success' && !cancelled()
         run: |
           cd $GITHUB_WORKSPACE
-          echo "JDKTARDIR=$jdk_dir" >> $GITHUB_ENV
-          export JDKTARDIR="$JDKTARDIR"
           find $jdk_dir -type f -name 'openjdk*' | while read FILE ; do
             echo -e "helmilog:: File located at $(readlink -f ${FILE})" ;
           done
+          export UPLOADPATH=/home/runner/work/openwrt-jdk/openwrt-jdk"
+          echo "UPLOADPATH=$UPLOADPATH" >> $GITHUB_ENV
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Generate New Release Tag
@@ -99,7 +99,7 @@ jobs:
         if: steps.listing_files.outputs.status == 'success' && !cancelled()
         run: |
           sleep 5
-          echo "release_tag=openjdk-build" >> $GITHUB_OUTPUT
+          echo "release_tag=openjdk-build-v$JDK_VER" >> $GITHUB_OUTPUT
           echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Upload HelmiWrt Packages to GitHub Release
@@ -112,7 +112,7 @@ jobs:
           name: OpenJDK Build ${{ env.FILE_DATE }}
           tag_name: ${{ steps.tag.outputs.release_tag }}
           files: |
-            $GITHUB_WORKSPACE/*.tar.gz
+            $UPLOADPATH/openjdk*.tar.gz
           body: |
             **OpenJDK Build for OpenWrt**
             [Donation here](https://www.helmiau.com/pay) • [Installation Tutorial](https://www.google.com/search?q=helmiau.com+helmiwrt+packages)

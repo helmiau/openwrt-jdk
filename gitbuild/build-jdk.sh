@@ -88,7 +88,7 @@ for arch in $ARCH;do
 			else
 				echo "EROOORORORORORORORO REPAXKXKIANC"
 			fi
-			[[ -n ${JDKSRCDIR} ]] && tar czf "${JDKVARCH}-v${VERSION}.tar.gz" -C "${JDKSRCDIR}/" .
+			[[ -n ${JDKSRCDIR} ]] && tar czf "${JDKVARCH}.tar.gz" -C "${JDKSRCDIR}/" .
 		fi
 	done
 done
