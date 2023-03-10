@@ -90,7 +90,7 @@ jobs:
           [ ! -d uploadPath ] && mkdir uploadPath
           export UPLOADPATH="$GITHUB_WORKSPACE/uploadPath"
           echo "UPLOADPATH=$UPLOADPATH" >> $GITHUB_ENV
-          find $jdk_dir -type f -name 'openjdk*' | while read FILE ; do
+          find . -type f -name 'openjdk*' | while read FILE ; do
             echo -e "helmilog:: File located at $(readlink -f ${FILE})"
             mv $(readlink -f ${FILE}) "${UPLOADPATH}/${FILE}"
           done
