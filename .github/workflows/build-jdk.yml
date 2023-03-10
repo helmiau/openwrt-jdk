@@ -53,7 +53,6 @@ jobs:
 
       - name: Setting Permissions
         id: sett_perm
-        if: steps.install_feeds.outputs.status == 'success' && !cancelled()
         run: |
           cd $GITHUB_WORKSPACE
           chmod +x $GITHUB_WORKSPACE/gitbuild/*.sh
