@@ -18,7 +18,7 @@ else
 fi
 
 # JDK8 or JDK11
-if [[ "$2" == "jdk8" ]];then
+if [[ "$2" == *"jdk"* ]];then
 	JDKV="open${2}"
 else
 	echo "JDK version is not set!... Exiting..."
