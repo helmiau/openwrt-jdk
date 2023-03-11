@@ -1,19 +1,9 @@
-## Get your OpenWrt run OpenJDK(musl-based)
 
-this scripts will automatically download musl-based OpenJDK to current directory 
+<h4 align="center">All information about this software, features, installations, screenshots, video preview and installation, credits etc. can be found at</h4>
+<h3 align="center"><a href="https://www.helmiau.com/blog/openwrt-jdk">OpenJDK for OpenWrt</a></h3>
+<h4 align="center">because it has translations feature. This will make it easier for you to understand each point.</h4>
 
-it works on my raspberry pi 3b+ , my Minecraft server(papermc)  works fine too
 
-Inspired from [Reinhart Previano s' blog](https://dev.to/reinhart1010/apparently-yes-you-can-install-openjdk-java-jre-and-yacy-on-openwrt-1e33) , update packages links
+<h3 align="center"><a href="https://www.helmiau.com/pay/index_en.html">Donation Here</a></h3>
 
-## Get  openjdk(optional)
-
-run `./dljdk8.sh` or `./dljdk11.sh`
-
-## Installation
-
-1. go to  [Release page](https://github.com/josedelinux/openwrt-jdk/releases/) to download OpenJDK according to your architecture
-2. Make a directory for the JDK: `mkdir -p /usr/lib/jvm`
-3. Extract the archive: `tar zxvf openjdk-version_arch.tar.gz -C /usr/lib/jvm`
-4. add `export PATH="/usr/lib/jvm/bin:$PATH"` to `/etc/profile`
-5. reboot and type `java -version`
+<h5 align="center">Copyright by <a href="http://www.helmiau.com">Helmi Amirudin</a> ® 2023 <br> Thank You ! 🤝</h5>
