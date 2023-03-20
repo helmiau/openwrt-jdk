@@ -51,7 +51,7 @@ else
 	LGH="latest release"
 fi
 
-echo -e "helmilog:: Installing [open${JDKURL}] [${LGH}] for [${1}] architecture..."
+echo -e "helmilog:: Installing [${2}] [${LGH}] for [${1}] architecture..."
 
 #functions check packages
 chkIPK () {
@@ -87,11 +87,12 @@ fi
 
 JDKTMP="/tmp/ojdk-out.tar.gz"
 JVMDIR="/usr/lib/jvm"
+PKGREVARCH="open${2}-${1} ${LGH}"
 # Downloading openjdk packages
 if curl --output /dev/null --silent --head --fail "${JDKURL}"; then
 	echo "URL exists: ${JDKURL}"
 	curl -o "${JDKTMP}" "${JDKURL}"
-	echo -e "helmilog:: ${PKGREVARCH} downloaded! extracting..."
+	echo -e "helmilog:: [${PKGREVARCH}] downloaded! extracting..."
 else
 	echo "helmilog:: URL does not exist! exiting..."
 	exit 1
