@@ -44,7 +44,7 @@ fi
 # $3 == Release Version
 if [[ -n "$3" ]];then
 	JDKURL="https://github.com/helmiau/openwrt-jdk/releases/download/openjdk-build-${3}/open${2}-${1}.tar.gz"
-	LGH="v${3}"
+	LGH="${3}"
 else
 	echo "helmilog:: Release Version is not set!, using latest release by default..."
 	JDKURL="https://github.com/helmiau/openwrt-jdk/releases/latest/download/open${2}-${1}.tar.gz"
